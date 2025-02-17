@@ -32,7 +32,7 @@
 
    Ou via l'interface d'administration :
 
-   - Accédez à **Extend** (Etendre) dans le menu d'administration.
+   - Accédez à **Extend** (Extension) dans le menu d'administration.
    - Recherchez **OIDC User Info**.
    - Cochez la case correspondante et cliquez sur **Install** (Installer).
 
@@ -44,8 +44,8 @@
 
 3. **Mapper les claims aux champs utilisateur Drupal** : Associez les données reçues du point de terminaison `userinfo` aux champs correspondants dans le profil utilisateur Drupal. Par exemple :
 
-   - `given_name` → Prénom
-   - `family_name` → Nom de famille
+   - `first_name` → Prénom
+   - `last_name` → Nom de famille
    - `email` → Adresse e-mail
 
    Ces claims sont définis par le fournisseur d'identité et peuvent varier.
