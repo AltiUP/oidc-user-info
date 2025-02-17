@@ -1,0 +1,11 @@
+name: 'OpenID Connect User Info'
+description: 'Affiche sur la page user les informations récupérée depuis OpenID Connect'
+package: Authentication
+
+type: module
+core_version_requirement: ^9 || ^10
+
+dependencies:
+  - oidc:oidc
+
+version: '2.0.0'
