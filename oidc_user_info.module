@@ -7,7 +7,7 @@ use Drupal\user\Entity\User;
 /**
  * Implements hook_user_login().
  *
- * Vérifie si l'utilisateur est authentifié et récupère les claims, notamment 'sub', 'first_name', 'last_name', 'membership_years' et 'picture_url'.
+ * Vérifie si l'utilisateur est authentifié et récupère les claims, notamment 'sub', 'first_name', 'last_name' et 'membership_years'.
  */
 function oidc_user_info_user_login(AccountInterface $account) {
   // Vérifie si l'utilisateur est authentifié via OpenID Connect.
