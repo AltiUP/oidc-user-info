@@ -1,8 +1,10 @@
 <?php
 
 use Drupal\Core\Session\AccountInterface;
+use Drupal\file\Entity\File;
 use Drupal\oidc\OpenidConnectSession;
 use Drupal\user\Entity\User;
+use Drupal\Core\File\FileSystemInterface;
 
 /**
  * Implements hook_user_login().
@@ -37,6 +39,8 @@ function oidc_user_info_user_login(AccountInterface $account) {
       'email' => 'field_email',
       'phone_number_landline' => 'field_phone_fixe',
       'phone_number_mobile' => 'field_phone_mobile',
+      'iss' => 'field_modifier_informations',
+      'membership_verify_url' => 'field_check_membership',
     ];
 
     foreach ($fields_map as $claim => $field_name) {
@@ -45,7 +49,71 @@ function oidc_user_info_user_login(AccountInterface $account) {
       }
     }
 
+    // Gestion de l'importation de l'image de profil depuis picture_url.
+    if (isset($claims['picture_url'])) {
+      $image_url = $claims['picture_url'];
+      $file = _oidc_user_info_download_user_picture($image_url, $account->id());
+
+      if ($file) {
+        // Associer l'image téléchargée au champ user_picture de l'utilisateur.
+        $account->set('user_picture', ['target_id' => $file->id()]);
+      }
+    }
+
     // Sauvegarde l'utilisateur avec les nouvelles valeurs dans les champs.
     $account->save();
   }
+}
+
+/**
+ * Télécharge l'image du profil utilisateur et l'associe au compte Drupal.
+ *
+ * @param string $image_url
+ *   L'URL de l'image du profil.
+ * @param int $uid
+ *   L'ID de l'utilisateur.
+ *
+ * @return \Drupal\file\Entity\File|null
+ *   Retourne l'entité du fichier si le téléchargement a réussi, sinon NULL.
+ */
+function _oidc_user_info_download_user_picture($image_url, $uid) {
+  try {
+    $data = file_get_contents($image_url);
+    if ($data === FALSE) {
+      \Drupal::logger('oidc_user_info')->error("Impossible de télécharger l'image : @url", ['@url' => $image_url]);
+      return NULL;
+    }
+
+    // Définition du répertoire de destination.
+    $directory = 'public://avatars';
+    $file_system = \Drupal::service('file_system');
+    $file_system->prepareDirectory($directory, FileSystemInterface::CREATE_DIRECTORY);
+
+    // Définition du nom du fichier.
+    $filename = 'user_' . $uid . '.jpg';
+    $file_uri = $directory . '/' . $filename;
+
+    // Écriture des données de l'image dans le fichier.
+    file_put_contents($file_uri, $data);
+
+    // Création de l'entité de fichier.
+    $file = File::create([
+      'uri' => $file_uri,
+      'status' => 1, // 1 = Permanent (Remplace FILE_STATUS_PERMANENT)
+    ]);
+
+    $file->save();
+
+    if ($file->id()) {
+      \Drupal::logger('oidc_user_info')->info("Image de profil enregistrée pour UID @uid : @uri", [
+        '@uid' => $uid,
+        '@uri' => $file_uri,
+      ]);
+      return $file;
+    }
+  } catch (\Exception $e) {
+    \Drupal::logger('oidc_user_info')->error("Erreur lors du téléchargement de l'image : @message", ['@message' => $e->getMessage()]);
+  }
+
+  return NULL;
 }
