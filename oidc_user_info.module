@@ -89,8 +89,18 @@ function _oidc_user_info_download_user_picture($image_url, $uid) {
     $file_system = \Drupal::service('file_system');
     $file_system->prepareDirectory($directory, FileSystemInterface::CREATE_DIRECTORY);
 
+    // Déterminer l'extension de l'image.
+    $path_info = pathinfo(parse_url($image_url, PHP_URL_PATH));
+    $extension = strtolower($path_info['extension'] ?? '');
+    $allowed_extensions = ['jpg', 'jpeg', 'png', 'svg', 'gif'];
+
+    if (!in_array($extension, $allowed_extensions)) {
+      \Drupal::logger('oidc_user_info')->error("Format de fichier non autorisé : @ext", ['@ext' => $extension]);
+      return NULL;
+    }
+
     // Définition du nom du fichier.
-    $filename = 'user_' . $uid . '.jpg';
+    $filename = 'user_' . $uid . '.' . $extension;
     $file_uri = $directory . '/' . $filename;
 
     // Écriture des données de l'image dans le fichier.
