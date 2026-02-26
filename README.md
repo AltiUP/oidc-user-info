@@ -38,11 +38,7 @@
 
 ## ⚙️ Configuration
 
-1. **Accéder aux paramètres du module** : Rendez-vous dans **Configuration** > **Services** > **OpenID Connect User Info**.
-
-2. **Configurer le point de terminaison `userinfo`** : Fournissez l'URL du point de terminaison `userinfo` de votre fournisseur d'identité. Par exemple, pour Auth0, l'URL est généralement `https://YOUR_DOMAIN/userinfo`.
-
-3. **Mapper les claims aux champs utilisateur Drupal** : Associez les données reçues du point de terminaison `userinfo` aux champs correspondants dans le profil utilisateur Drupal. Par exemple :
+1. **Mapper les claims aux champs utilisateur Drupal** : Associez les données reçues du point de terminaison `userinfo` aux champs correspondants dans le profil utilisateur Drupal. Par exemple :
 
    - `first_name` → Prénom
    - `last_name` → Nom de famille
